@@ -19,7 +19,7 @@ if not os.path.exists(first_dir):
     os.mkdir(first_dir)
 land_data_file_path = os.path.join(first_dir, 'land.json')
 config_data_file_path = os.path.join(first_dir, 'config.json')
-money_data_file_path = os.path.join(current_dir, 'plugins', 'umoney', 'money.json')
+money_data_file_path = os.path.join(current_dir, 'plugins', 'money', 'money.json')
 
 class uland(Plugin):
     api_version = '0.5'
