@@ -183,7 +183,8 @@ class uland(Plugin):
     def create_land(self, player: Player):
         # 检测玩家名下领地数量
         if len(self.land_data[player.name].keys()) >= self.config_data['max_land_per_player']:
-            player.send_message(f'{ColorFormat.RED}圈地失败： {ColorFormat.WHITE}你拥有的领地数量已满{self.config_data['max_land_per_player']}个...')
+            player.send_message(f'{ColorFormat.RED}圈地失败： '
+                                f'{ColorFormat.WHITE}你拥有的领地数量已满{self.config_data['max_land_per_player']}个...')
             return
         # 检测玩家是否已经有圈地进程在进行，没有则开始圈地经常
         if not self.record_create_land_event.get(player.name):
