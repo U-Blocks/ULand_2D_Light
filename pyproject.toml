@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "endstone-uland"
-version = "0.0.0"
+version = "250109"
 description = "null"
 
 [project.entry-points."endstone"]

@@ -184,7 +184,7 @@ class uland(Plugin):
         # 检测玩家名下领地数量
         if len(self.land_data[player.name].keys()) >= self.config_data['max_land_per_player']:
             player.send_message(f'{ColorFormat.RED}圈地失败： '
-                                f'{ColorFormat.WHITE}你拥有的领地数量已满{self.config_data['max_land_per_player']}个...')
+                                f'{ColorFormat.WHITE}你拥有的领地数量已满{self.config_data["max_land_per_player"]}个...')
             return
         # 检测玩家是否已经有圈地进程在进行，没有则开始圈地经常
         if not self.record_create_land_event.get(player.name):
@@ -198,7 +198,7 @@ class uland(Plugin):
             task = self.server.scheduler.run_task(self, lambda x=player: self.on_create_land(player), delay=0, period=20)
             # 将判断玩家圈地耗时的 task 存储到实时圈地进程记录中
             self.record_create_land_event[player.name]['task'] = task
-            player.send_message(f'{ColorFormat.YELLOW}圈地模式已开启, 请在{self.config_data['land_create_timeout']}s内完成圈地...\n'
+            player.send_message(f'{ColorFormat.YELLOW}圈地模式已开启, 请在{self.config_data["land_create_timeout"]}s内完成圈地...\n'
                                 f'输入 /posa 选中A点\n'
                                 f'输入 /posb 选中B点\n'
                                 f'注意： 不能跨维度选点, 所选A点坐标和B点坐标不能重复！')
@@ -268,7 +268,7 @@ class uland(Plugin):
             return
         if area > self.config_data['max_area']:
             del self.record_create_land_event[player.name]
-            player.send_message(f'{ColorFormat.RED}圈地失败： {ColorFormat.WHITE}你所选中的领地面积大于{self.config_data['max_area']}, 数据已释放...')
+            player.send_message(f'{ColorFormat.RED}圈地失败： {ColorFormat.WHITE}你所选中的领地面积大于{self.config_data["max_area"]}, 数据已释放...')
             return
         # 计算玩家圈中的领地所耗费的经济
         land_expense = area * self.config_data['land_buy_price']
