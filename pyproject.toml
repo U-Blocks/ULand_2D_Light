@@ -1,0 +1,11 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "endstone-uland"
+version = "0.0.0"
+description = "null"
+
+[project.entry-points."endstone"]
+uland = "endstone_uland:uland"
