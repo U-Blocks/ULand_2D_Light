@@ -574,7 +574,7 @@ class uland(Plugin):
             toggle3 = Toggle(
                 label=f'{ColorFormat.YELLOW}开启危险生物防护 （苦力怕, 凋零）'
             )
-            if self.land_data[player.name][land_name]['mob_grief_protect'] == True:
+            if self.land_data[player.name][land_name]["mob_grief_protect"] == True:
                 toggle3.default_value = True
             else:
                 toggle3.default_value = False
@@ -704,7 +704,7 @@ class uland(Plugin):
                                              f'{ColorFormat.YELLOW}回收价： {ColorFormat.WHITE}{land_sell_money}\n'
                                              f'\n'
                                              f'{ColorFormat.AQUA}领地回收价浮动已开启\n'
-                                             f'{ColorFormat.YELLOW}今天离你创建领地已满{self.config_data['land_sell_cool_down_timeout']}天\n'
+                                             f'{ColorFormat.YELLOW}今天离你创建领地已满{self.config_data["land_sell_cool_down_timeout"]}天\n'
                                              f'{ColorFormat.GREEN}可回收')
                     confirm_form.add_button(f'{ColorFormat.YELLOW}回收', icon='textures/ui/realms_slot_check', on_click=self.my_land_sell_confirm(land_name, land_sell_money))
                 else:
@@ -713,7 +713,7 @@ class uland(Plugin):
                                              f'{ColorFormat.YELLOW}当日回收价率： {ColorFormat.WHITE}{land_sell_rate}\n'
                                              f'\n'
                                              f'{ColorFormat.AQUA}领地回收价浮动已开启\n'
-                                             f'{ColorFormat.YELLOW}今天离你创建领地不足{self.config_data['land_sell_cool_down_timeout']}天\n'
+                                             f'{ColorFormat.YELLOW}今天离你创建领地不足{self.config_data["land_sell_cool_down_timeout"]}天\n'
                                              f'{ColorFormat.RED}不可回收')
             confirm_form.add_button(f'{ColorFormat.YELLOW}返回', icon='textures/ui/refresh_light', on_click=self.my_land)
             player.send_form(confirm_form)
@@ -800,12 +800,12 @@ class uland(Plugin):
                         land_member += ' '
                     land_info_form.content += (f'{ColorFormat.YELLOW}领主： {ColorFormat.WHITE}{land_owner}\n'
                                                f'{ColorFormat.YELLOW}领地名： {ColorFormat.WHITE}{land_name}\n'
-                                               f'{ColorFormat.YELLOW}维度： {ColorFormat.WHITE}{land_info['dimension']}\n'
-                                               f'{ColorFormat.YELLOW}范围： {ColorFormat.WHITE}{land_info['range']}\n'
-                                               f'{ColorFormat.YELLOW}面积： {ColorFormat.WHITE}{land_info['area']}\n'
-                                               f'{ColorFormat.YELLOW}购入价： {ColorFormat.WHITE}{land_info['land_expense']}\n'
-                                               f'{ColorFormat.YELLOW}创建时间： {ColorFormat.WHITE}{land_info['land_buy_time']}\n'
-                                               f'{ColorFormat.YELLOW}传送点： {ColorFormat.WHITE}({land_info['land_tp'][0]}, {land_info['land_tp'][1]}, {land_info['land_tp'][2]})\n'
+                                               f'{ColorFormat.YELLOW}维度： {ColorFormat.WHITE}{land_info["dimension"]}\n'
+                                               f'{ColorFormat.YELLOW}范围： {ColorFormat.WHITE}{land_info["range"]}\n'
+                                               f'{ColorFormat.YELLOW}面积： {ColorFormat.WHITE}{land_info["area"]}\n'
+                                               f'{ColorFormat.YELLOW}购入价： {ColorFormat.WHITE}{land_info["land_expense"]}\n'
+                                               f'{ColorFormat.YELLOW}创建时间： {ColorFormat.WHITE}{land_info["land_buy_time"]}\n'
+                                               f'{ColorFormat.YELLOW}传送点： {ColorFormat.WHITE}({land_info["land_tp"][0]}, {land_info["land_tp"][1]}, {land_info["land_tp"][2]})\n'
                                                f'{ColorFormat.YELLOW}成员： {ColorFormat.WHITE}{land_member}')
                     player.send_form(land_info_form)
                     flag = False
@@ -877,19 +877,19 @@ class uland(Plugin):
     # 重載配置文件函数
     def reload_config_data(self, player :Player):
         textinput1 = TextInput(
-            label=f'{ColorFormat.YELLOW}当前领地单价： {ColorFormat.WHITE}{self.config_data['land_buy_price']}',
+            label=f'{ColorFormat.YELLOW}当前领地单价： {ColorFormat.WHITE}{self.config_data["land_buy_price"]}',
             placeholder='请输入一个正整数, 例如：5'
         )
         textinput2 = TextInput(
-            label=f'{ColorFormat.YELLOW}当前圈地最大耗时： {ColorFormat.WHITE}{self.config_data['land_create_timeout']}',
+            label=f'{ColorFormat.YELLOW}当前圈地最大耗时： {ColorFormat.WHITE}{self.config_data["land_create_timeout"]}',
             placeholder='请输入一个不小于30的正整数, 例如: 30'
         )
         textinput3 = TextInput(
-            label=f'{ColorFormat.YELLOW}当前允许的最大领地面积： {ColorFormat.WHITE}{self.config_data['max_area']}',
+            label=f'{ColorFormat.YELLOW}当前允许的最大领地面积： {ColorFormat.WHITE}{self.config_data["max_area"]}',
             placeholder='请输入一个不小于4的正整数, 例如：40000'
         )
         textinput4 = TextInput(
-            label=f'{ColorFormat.YELLOW}当前允许玩家拥有的最大领地数量： {ColorFormat.WHITE}{self.config_data['max_land_per_player']}',
+            label=f'{ColorFormat.YELLOW}当前允许玩家拥有的最大领地数量： {ColorFormat.WHITE}{self.config_data["max_land_per_player"]}',
             placeholder='请输入一个正整数, 例如：3'
         )
         toggle = Toggle(
@@ -900,7 +900,7 @@ class uland(Plugin):
         else:
             toggle.default_value = False
         textinput5 = TextInput(
-            label=f'{ColorFormat.YELLOW}当前领地回收冷却天数： {ColorFormat.WHITE}{self.config_data['land_sell_cool_down_timeout']}',
+            label=f'{ColorFormat.YELLOW}当前领地回收冷却天数： {ColorFormat.WHITE}{self.config_data["land_sell_cool_down_timeout"]}',
             placeholder='请输入一个不小于1的整数, 例如：3'
         )
         reload_config_data_form = ModalForm(
