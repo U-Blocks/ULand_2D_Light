@@ -436,7 +436,7 @@ class uland(Plugin):
             elif dimension == 'Nether':
                 target_dimension = self.server.level.get_dimension('NETHER')
             else:
-                target_dimension = self.server.level.get_dimension('THE_END')
+                target_dimension = self.server.level.get_dimension('the_end')
             location = Location(
                 target_dimension,
                 x=float(land_tp[0]),
