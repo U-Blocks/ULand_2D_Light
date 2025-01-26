@@ -13,7 +13,7 @@
     <br />Just put this plugin into plugins folder, and then start the server. Enter the command /ul to call out the main form.
     <br />
     <br />:pencil:Wiki
-    <br />:link:https://docs.qq.com/pdf/DQnBidEZzelpnY1px
+    <br />:link:https://docs.qq.com/pdf/DQktCeFdUYW1wZ1h2
     <br /><img height="300" src="https://github.com/umarurize/ULand_2D_Light/blob/master/logo/ULand2.png" />
     <br />
     <br />:star: If you like my plugins, give me a star plz.
