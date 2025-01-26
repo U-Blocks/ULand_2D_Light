@@ -116,6 +116,7 @@ class uland(Plugin):
             land_main_form.add_button(f'{ColorFormat.YELLOW}查询脚下领地', icon='textures/ui/magnifyingGlass', on_click=self.land_info)
             land_main_form.add_button(f'{ColorFormat.YELLOW}服务器公开领地', icon='textures/ui/mashup_world', on_click=self.server_public_land)
             if player.is_op == True:
+                land_main_form.add_button(f'{ColorFormat.YELLOW}管理服务器领地', icon='textures/ui/mashup_world', on_click=self.manage_all_lands)
                 land_main_form.add_button(f'{ColorFormat.YELLOW}领地系统配置', icon='textures/ui/op', on_click=self.land_system_config)
             if os.path.exists(zx_ui_dir) == True:
                 land_main_form.add_button(f'{ColorFormat.YELLOW}返回', icon='textures/ui/refresh_light', on_click=self.back_to_menu)
@@ -960,6 +961,80 @@ class uland(Plugin):
             self.land_data = json.loads(f.read())
         player.send_message(f'{ColorFormat.YELLOW}重载领地数据成功...')
 
+    # 管理服务器内所有领地（管理员）
+    def manage_all_lands(self, player: Player):
+        manage_all_lands_form = ActionForm(
+            title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}管理服务器领地',
+            content=f'{ColorFormat.GREEN}你是管理员, 可以管理服务器所有领地...',
+            on_close=self.back_to_main_form
+        )
+        for key, value in self.land_data.items():
+            land_owner = key
+            land = value
+            for key, value in land.items():
+                land_name = key
+                land_info = value
+                dimension = land_info['dimension']
+                range = land_info['range']
+                area = land_info['area']
+                land_expense = land_info['land_expense']
+                land_buy_time = land_info['land_buy_time']
+                land_tp = land_info['land_tp']
+                permissions = land_info['permissions']
+                manage_all_lands_form.add_button(f'{land_name}\n{ColorFormat.YELLOW}[领主] {land_owner}', icon='textures/ui/icon_spring', on_click=self.manage_land_detail(
+                    land_owner, land_name, dimension, range, area, land_expense, land_buy_time, land_tp, permissions
+                ))
+        manage_all_lands_form.add_button(f'{ColorFormat.YELLOW}返回', icon='textures/ui/refresh_light', on_click=self.back_to_main_form)
+        player.send_form(manage_all_lands_form)
+
+    def manage_land_detail(self, land_owner, land_name, dimension, range, area, land_expense, land_buy_time, land_tp, permissions):
+        def on_click(player: Player):
+            manage_land_detail_form = ActionForm(
+                title=land_name,
+                content=f'{ColorFormat.YELLOW}领主： {ColorFormat.WHITE}{land_owner}\n'
+                        f'{ColorFormat.YELLOW}维度： {ColorFormat.WHITE}{dimension}\n'
+                        f'{ColorFormat.YELLOW}范围： {ColorFormat.WHITE}{range}\n'
+                        f'{ColorFormat.YELLOW}面积： {ColorFormat.WHITE}{area}\n'
+                        f'{ColorFormat.YELLOW}购入价： {ColorFormat.WHITE}{land_expense}\n'
+                        f'{ColorFormat.YELLOW}创建时间： {ColorFormat.WHITE}{land_buy_time}\n'
+                        f'{ColorFormat.YELLOW}传送点： {ColorFormat.WHITE}({land_tp[0]}, {land_tp[1]}, {land_tp[2]})\n'
+                        f'{ColorFormat.YELLOW}成员： {ColorFormat.YELLOW}',
+                on_close=self.manage_all_lands
+            )
+            if len(permissions) == 0:
+                manage_land_detail_form.content += '无'
+            else:
+                for member in permissions:
+                    manage_land_detail_form.content += member
+                    manage_land_detail_form.content += ', '
+            manage_land_detail_form.content += f'\n\n{ColorFormat.GREEN}请选择操作...'
+            manage_land_detail_form.add_button(f'{ColorFormat.YELLOW}传送领地', icon='textures/ui/realmsIcon', on_click=self.tp_to_my_land(land_tp, dimension))
+            manage_land_detail_form.add_button(f'{ColorFormat.YELLOW}释放领地', icon='textures/ui/cancel', on_click=self.manage_land_delete(land_owner, land_name))
+            manage_land_detail_form.add_button(f'{ColorFormat.YELLOW}返回', icon='textures/ui/refresh_light', on_click=self.manage_all_lands)
+            player.send_form(manage_land_detail_form)
+        return on_click
+
+    # 强制删除领地
+    def manage_land_delete(self, land_owner, land_name):
+        def on_click(player: Player):
+            confirm_form= ActionForm(
+                title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}确认表单',
+                content=f'{ColorFormat.GREEN}你确定要删除玩家 {ColorFormat.WHITE}{land_owner} {ColorFormat.GREEN}'
+                        f'的领地 {ColorFormat.RESET}{land_name} {ColorFormat.GREEN}吗？',
+                on_close=self.manage_all_lands
+            )
+            confirm_form.add_button(f'{ColorFormat.YELLOW}删除', icon='textures/ui/realms_slot_check', on_click=self.manage_land_delete_confirm(land_owner, land_name))
+            confirm_form.add_button(f'{ColorFormat.YELLOW}返回', icon='textures/ui/refresh_light', on_click=self.manage_all_lands)
+            player.send_form(confirm_form)
+        return on_click
+
+    def manage_land_delete_confirm(self, land_owner, land_name):
+        def on_click(player: Player):
+            self.land_data[land_owner].pop(land_name)
+            self.save_land_data()
+            player.send_message(f'{ColorFormat.YELLOW}删除领地成功...')
+        return on_click
+
     # 加载经济数据函数
     def load_money_data(self):
         with open(money_data_file_path, 'r', encoding='utf-8') as f:
@@ -1023,6 +1098,10 @@ class uland(Plugin):
     # 监听方块破坏函数
     @event_handler
     def on_block_break(self, event: BlockBreakEvent):
+        # 测试用代码
+        '''self.logger.info(f'{event.player.game_mode.value}')'''
+        if event.player.is_op == True and event.player.game_mode.value == 1:
+            return
         block_pos = [math.floor(event.block.location.x), math.floor(event.block.location.z)]
         block_dimension = event.block.dimension.name
         source_player = event.player
@@ -1112,6 +1191,8 @@ class uland(Plugin):
     # 监听玩家右键方块函数
     @event_handler
     def on_player_right_click_block(self, event: PlayerInteractEvent):
+        if event.player.is_op == True and event.player.game_mode.value == 1:
+            return
         block_pos = [math.floor(event.block.location.x),math.floor(event.block.location.z)]
         block_dimension = event.block.dimension.name
         source_player = event.player
@@ -1135,6 +1216,8 @@ class uland(Plugin):
     # 监听玩家右键 Mob 函数
     @event_handler
     def on_player_right_click_entity(self, event: PlayerInteractActorEvent):
+        if event.player.is_op == True and event.player.game_mode.value == 1:
+            return
         actor_pos = [math.floor(event.actor.location.x), math.floor(event.actor.location.z)]
         actor_dimension = event.actor.dimension.name
         source_player = event.player
