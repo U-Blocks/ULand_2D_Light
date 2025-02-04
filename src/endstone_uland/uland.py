@@ -52,8 +52,8 @@ class uland(Plugin):
         self.config_data = config_data
         # 加载 money 数据
         if not os.path.exists(money_data_file_path):
-            self.logger.info(f'{ColorFormat.RED}缺少必要前置 jsonmoney...')
-            return
+            self.logger.error(f'{ColorFormat.RED}缺少必要前置 jsonmoney...')
+            self.server.plugin_manager.disable_plugin(self)
         else:
             with open(money_data_file_path, 'r', encoding='utf-8') as f:
                 money_data = json.loads(f.read())
@@ -279,8 +279,8 @@ class uland(Plugin):
         if player_money < land_expense:
             del self.record_create_land_event[player.name]
             player.send_message(f'{ColorFormat.RED}圈地失败： {ColorFormat.WHITE}你的余额不足以支付圈地费用\n'
-                                f'领地价格： {land_expense}\n'
-                                f'你的余额： {player_money}')
+                                f'{ColorFormat.RED}领地价格： {land_expense}\n'
+                                f'{ColorFormat.RED}你的余额： {player_money}')
             return
         # 整合信息，并为玩家发送表单
         textinput1 = TextInput(
@@ -330,7 +330,9 @@ class uland(Plugin):
             self.save_money_data()
             del self.record_create_land_event[player.name]
             self.save_land_data()
-            player.send_message(f'{ColorFormat.YELLOW}圈地成功...')
+            # 完善余额变动提示
+            player.send_message(f'{ColorFormat.YELLOW}圈地成功： {ColorFormat.RED}-{land_expense}, '
+                                f'{ColorFormat.YELLOW}余额： {ColorFormat.WHITE}{self.money_data[player.name]}')
         further_create_land_form.on_submit = on_submit
         player.send_form(further_create_land_form)
 
@@ -529,8 +531,11 @@ class uland(Plugin):
             textinput = TextInput(
                 label=f'{ColorFormat.YELLOW}原领地名： {land_name}\n'
                       f'\n'
-                      f'{ColorFormat.GREEN}请输入新的领地名...',
-                placeholder=f'留空则默认为： {player.name}的领地'
+                      f'{ColorFormat.GREEN}请输入新的领地名...\n'
+                      f'{ColorFormat.GREEN}（请输入任意字符串, 留空则默认为： {player.name}的领地...）',
+                placeholder=f'请输入任意字符串, 留空则默认为： {player.name}的领地...',
+                # 增添默认值显示
+                default_value=land_name
             )
             my_land_rename_form = ModalForm(
                 title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}重命名领地',
@@ -764,7 +769,8 @@ class uland(Plugin):
             self.money_data[player.name] += land_sell_money
             self.save_land_data()
             self.save_money_data()
-            player.send_message(f'{ColorFormat.YELLOW}领地回收成功...')
+            player.send_message(f'{ColorFormat.YELLOW}领地回收成功： {ColorFormat.GREEN}+{land_sell_money}, '
+                                f'{ColorFormat.YELLOW}余额： {ColorFormat.WHITE}{self.money_data[player.name]}')
         return on_click
 
     # 查询脚下领地信息函数
@@ -878,31 +884,41 @@ class uland(Plugin):
     # 重載配置文件函数
     def reload_config_data(self, player :Player):
         textinput1 = TextInput(
-            label=f'{ColorFormat.YELLOW}当前领地单价： {ColorFormat.WHITE}{self.config_data["land_buy_price"]}',
-            placeholder='请输入一个正整数, 例如：5'
+            label=f'{ColorFormat.YELLOW}当前领地单价： {ColorFormat.WHITE}{self.config_data["land_buy_price"]}\n'
+                  f'{ColorFormat.YELLOW}输入新的领地单价...\n（请输入一个正整数, 例如： 5...）',
+            placeholder='请输入一个正整数, 例如： 5...',
+            default_value=f'{self.config_data["land_buy_price"]}'
         )
         textinput2 = TextInput(
-            label=f'{ColorFormat.YELLOW}当前圈地最大耗时： {ColorFormat.WHITE}{self.config_data["land_create_timeout"]}',
-            placeholder='请输入一个不小于30的正整数, 例如: 30'
+            label=f'{ColorFormat.YELLOW}当前圈地最大耗时： {ColorFormat.WHITE}{self.config_data["land_create_timeout"]}\n'
+                  f'{ColorFormat.YELLOW}输入新的圈地最大耗时...\n（请输入一个不小于30的正整数, 例如： 30...）',
+            placeholder='请输入一个不小于30的正整数, 例如： 30...',
+            default_value=f'{self.config_data["land_create_timeout"]}'
         )
         textinput3 = TextInput(
-            label=f'{ColorFormat.YELLOW}当前允许的最大领地面积： {ColorFormat.WHITE}{self.config_data["max_area"]}',
-            placeholder='请输入一个不小于4的正整数, 例如：40000'
+            label=f'{ColorFormat.YELLOW}当前允许的最大领地面积： {ColorFormat.WHITE}{self.config_data["max_area"]}\n'
+                  f'{ColorFormat.YELLOW}输入新的最大领地面积...\n（请输入一个不小于4的正整数, 例如： 40000...）',
+            placeholder='请输入一个不小于4的正整数, 例如： 40000...',
+            default_value=f'{self.config_data["max_area"]}'
         )
         textinput4 = TextInput(
-            label=f'{ColorFormat.YELLOW}当前允许玩家拥有的最大领地数量： {ColorFormat.WHITE}{self.config_data["max_land_per_player"]}',
-            placeholder='请输入一个正整数, 例如：3'
+            label=f'{ColorFormat.YELLOW}当前允许玩家拥有的最大领地数量： {ColorFormat.WHITE}{self.config_data["max_land_per_player"]}\n'
+                  f'{ColorFormat.YELLOW}输入新的最大领地数量...\n（请输入一个正整数, 例如： 3...）',
+            placeholder='请输入一个正整数, 例如： 3...',
+            default_value=f'{self.config_data["max_land_per_player"]}'
         )
         toggle = Toggle(
             label=f'{ColorFormat.YELLOW}开启领地回收价浮动'
         )
-        if self.config_data['is_land_sell_rate_on'] == True:
+        if self.config_data['is_land_sell_rate_on']:
             toggle.default_value = True
         else:
             toggle.default_value = False
         textinput5 = TextInput(
-            label=f'{ColorFormat.YELLOW}当前领地回收冷却天数： {ColorFormat.WHITE}{self.config_data["land_sell_cool_down_timeout"]}',
-            placeholder='请输入一个不小于1的整数, 例如：3'
+            label=f'{ColorFormat.YELLOW}当前领地回收冷却天数： {ColorFormat.WHITE}{self.config_data["land_sell_cool_down_timeout"]}\n'
+                  f'{ColorFormat.YELLOW}输入新的领地回收冷却天数...\n（请输入一个不小于1的整数, 例如： 3...）',
+            placeholder='请输入一个不小于1的整数, 例如： 3...',
+            default_value=f'{self.config_data["land_sell_cool_down_timeout"]}'
         )
         reload_config_data_form = ModalForm(
             title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}重载配置文件表单',
@@ -911,43 +927,31 @@ class uland(Plugin):
         )
         def on_submit(player: Player, json_str):
             data = json.loads(json_str)
+            # 判断所有 textinput 是否填入了正确的数字类型
             try:
-                if data[0] == '':
-                    new_land_sell_price = self.config_data['land_buy_price']
-                else:
-                    new_land_sell_price = int(data[0])
-                if data[1] == '':
-                    new_land_create_timeout = self.config_data['land_create_timeout']
-                else:
-                    new_land_create_timeout = int(data[1])
-                if data[2] == '':
-                    new_max_area = self.config_data['max_area']
-                else:
-                    new_max_area = int(data[2])
-                if data[3] == '':
-                    new_max_land_per_player = self.config_data['max_land_per_player']
-                else:
-                    new_max_land_per_player = int(data[3])
-                if data[5] == '':
-                    new_land_sell_cool_down_timeout = self.config_data['land_sell_cool_down_timeout']
-                else:
-                    new_land_sell_cool_down_timeout = int(data[3])
+                update_land_buy_price = int(data[0])
+                update_land_create_timeout = int(data[1])
+                update_max_area = int(data[2])
+                update_max_land_per_player = int(data[3])
+                update_land_sell_cool_down_timeout = int(data[5])
             except:
                 player.send_message(f'{ColorFormat.RED}表单解析错误, 请按提示正确填写...')
                 return
-            if (new_land_sell_price <= 0 or new_land_create_timeout < 30 or new_land_sell_cool_down_timeout < 1
-                    or new_max_area < 4 or new_max_land_per_player <= 0):
+            if (update_land_buy_price <= 0 or update_land_create_timeout < 30
+                    or update_max_area < 4 or update_max_land_per_player <= 0
+                    or update_land_sell_cool_down_timeout < 1):
                 player.send_message(f'{ColorFormat.RED}表单解析错误, 请按提示正确填写...')
                 return
-            self.config_data['land_buy_price'] = new_land_sell_price
-            self.config_data['land_create_timeout'] = new_land_create_timeout
-            self.config_data['max_area'] = new_max_area
-            self.config_data['max_land_per_player'] = new_max_land_per_player
-            if data[4] == True:
+            # 更新配置
+            self.config_data['land_buy_price'] = update_land_buy_price
+            self.config_data['land_create_timeout'] = update_land_create_timeout
+            self.config_data['max_area'] = update_max_area
+            self.config_data['max_land_per_player'] = update_max_land_per_player
+            self.config_data['land_sell_cool_down_timeout'] = update_land_sell_cool_down_timeout
+            if data[4]:
                 self.config_data['is_land_sell_rate_on'] = True
             else:
                 self.config_data['is_land_sell_rate_on'] = False
-            self.config_data['land_sell_cool_down_timeout'] = new_land_sell_cool_down_timeout
             with open(config_data_file_path, 'w+', encoding='utf-8') as f:
                 json_str = json.dumps(self.config_data, indent=4, ensure_ascii=False)
                 f.write(json_str)
