@@ -10,7 +10,7 @@ from endstone import ColorFormat, Player
 from endstone.plugin import Plugin
 from endstone.command import Command, CommandSender, CommandSenderWrapper
 from endstone.form import ActionForm, ModalForm, Dropdown, Toggle, TextInput
-from endstone.event import event_handler, PlayerJoinEvent, PlayerQuitEvent, BlockBreakEvent, ActorKnockbackEvent, PlayerInteractEvent, PlayerInteractActorEvent, ActorSpawnEvent
+from endstone.event import *
 
 current_dir = os.getcwd()
 first_dir = os.path.join(current_dir, 'plugins', 'uland')
@@ -19,10 +19,10 @@ if not os.path.exists(first_dir):
     os.mkdir(first_dir)
 land_data_file_path = os.path.join(first_dir, 'land.json')
 config_data_file_path = os.path.join(first_dir, 'config.json')
-money_data_file_path = os.path.join(current_dir, 'plugins', 'money', 'money.json')
+money_data_file_path = os.path.join(current_dir, 'plugins', 'umoney', 'money.json')
 
 class uland(Plugin):
-    api_version = '0.5'
+    api_version = '0.6'
 
     def on_enable(self):
         # 加载领地数据
@@ -34,6 +34,24 @@ class uland(Plugin):
         else:
             with open(land_data_file_path, 'r', encoding='utf-8') as f:
                 land_data = json.loads(f.read())
+        for land in land_data.values():
+            for land_info in land.values():
+                # 250221更新 - 去除
+                if land_info.get('tnt_explode_protect') is not None:
+                    land_info.pop('tnt_explode_protect')
+                # 250221更新 - 去除
+                if land_info.get('mob_grief_protect') is not None:
+                    land_info.pop('mob_grief_protect')
+                # 250221更新 - 新增
+                if land_info.get('anti_player_attack') is None:
+                    land_info['anti_player_attack'] = True
+                if land_info.get('explode_protect') is None:
+                    land_info['explode_protect'] = True
+                if land_info.get('anti_wither_enter')is None:
+                    land_info['anti_wither_enter'] = True
+        with open(land_data_file_path, 'w+', encoding='utf-8') as f:
+            json_str = json.dumps(land_data, indent=4, ensure_ascii=False)
+            f.write(json_str)
         self.land_data = land_data
         # 加载配置文件
         if not os.path.exists(config_data_file_path):
@@ -50,14 +68,10 @@ class uland(Plugin):
             with open(config_data_file_path, 'r', encoding='utf-8') as f:
                 config_data = json.loads(f.read())
         self.config_data = config_data
-        # 加载 money 数据
+        # 检测 UMoney 前置是否安装
         if not os.path.exists(money_data_file_path):
-            self.logger.error(f'{ColorFormat.RED}缺少必要前置 jsonmoney...')
+            self.logger.error(f'{ColorFormat.RED}缺少前置 UMoney...')
             self.server.plugin_manager.disable_plugin(self)
-        else:
-            with open(money_data_file_path, 'r', encoding='utf-8') as f:
-                money_data = json.loads(f.read())
-        self.money_data = money_data
         self.record_create_land_event = {}
         self.register_events(self)
         self.server.scheduler.run_task(self, self.check_player_pos, delay=0, period=20)
@@ -115,7 +129,7 @@ class uland(Plugin):
             land_main_form.add_button(f'{ColorFormat.YELLOW}我的领地', icon='textures/ui/icon_recipe_nature', on_click=self.my_land)
             land_main_form.add_button(f'{ColorFormat.YELLOW}查询脚下领地', icon='textures/ui/magnifyingGlass', on_click=self.land_info)
             land_main_form.add_button(f'{ColorFormat.YELLOW}服务器公开领地', icon='textures/ui/mashup_world', on_click=self.server_public_land)
-            if player.is_op == True:
+            if player.is_op:
                 land_main_form.add_button(f'{ColorFormat.YELLOW}管理服务器领地', icon='textures/ui/mashup_world', on_click=self.manage_all_lands)
                 land_main_form.add_button(f'{ColorFormat.YELLOW}领地系统配置', icon='textures/ui/op', on_click=self.land_system_config)
             if os.path.exists(zx_ui_dir) == True:
@@ -274,8 +288,7 @@ class uland(Plugin):
         # 计算玩家圈中的领地所耗费的经济
         land_expense = area * self.config_data['land_buy_price']
         # 判断玩家的经济是否能支付圈中领地所耗费的经济，不能则返回
-        self.load_money_data()
-        player_money = self.money_data[player.name]
+        player_money = self.server.plugin_manager.get_plugin('umoney').api_get_player_money(player.name)
         if player_money < land_expense:
             del self.record_create_land_event[player.name]
             player.send_message(f'{ColorFormat.RED}圈地失败： {ColorFormat.WHITE}你的余额不足以支付圈地费用\n'
@@ -321,18 +334,16 @@ class uland(Plugin):
                                                       'permissions': [],
                                                       'public_land': False,
                                                       'fire_protect': True,
-                                                      'tnt_explode_protect': True,
-                                                      'mob_grief_protect': True,
+                                                      'explode_protect': True,
+                                                      'anti_wither_enter': True,
                                                       'anti_right_click_block': True,
                                                       'anti_break_block': True,
-                                                      'anti_right_click_entity': True}
-            self.money_data[player.name] -= land_expense
-            self.save_money_data()
+                                                      'anti_right_click_entity': True,
+                                                      'anti_player_attack': True}
             del self.record_create_land_event[player.name]
             self.save_land_data()
-            # 完善余额变动提示
-            player.send_message(f'{ColorFormat.YELLOW}圈地成功： {ColorFormat.RED}-{land_expense}, '
-                                f'{ColorFormat.YELLOW}余额： {ColorFormat.WHITE}{self.money_data[player.name]}')
+            player.send_message(f'{ColorFormat.YELLOW}圈地成功...')
+            self.server.plugin_manager.get_plugin('umoney').api_change_player_money(player.name, -land_expense)
         further_create_land_form.on_submit = on_submit
         player.send_form(further_create_land_form)
 
@@ -340,8 +351,6 @@ class uland(Plugin):
     def on_cancel_further_create_land(self, player: Player):
         del self.record_create_land_event[player.name]
         player.send_message(f'{ColorFormat.RED}圈地取消, {ColorFormat.WHITE}数据已释放...')
-        # 测试用代码...
-        '''self.logger.info(f'{self.record_create_land_event}')'''
 
     # 防止玩家在圈地过程中下线造成的崩服
     @event_handler
@@ -349,8 +358,6 @@ class uland(Plugin):
         if self.record_create_land_event.get(event.player.name):
             self.server.scheduler.cancel_task(self.record_create_land_event[event.player.name]['task'].task_id)
             del self.record_create_land_event[event.player.name]
-            # 测试用代码...
-            '''self.logger.info(f'{self.record_create_land_event}')'''
 
     # 查看领地函数
     def my_land(self, player: Player):
@@ -564,57 +571,64 @@ class uland(Plugin):
     def my_land_set_security(self, land_name):
         def on_click(player: Player):
             toggle1 = Toggle(
-                label=f'{ColorFormat.YELLOW}开启防火 （同时禁用：闪电）'
+                label=f'{ColorFormat.YELLOW}开启领地防火 （同时禁用：闪电|火焰弹）'
             )
             if self.land_data[player.name][land_name]['fire_protect'] == True:
                 toggle1.default_value = True
             else:
                 toggle1.default_value = False
             toggle2 = Toggle(
-                label=f'{ColorFormat.YELLOW}开启TNT防爆 （同时禁用：水晶生成）'
+                label=f'{ColorFormat.YELLOW}开启领地防爆'
             )
-            if self.land_data[player.name][land_name]['tnt_explode_protect'] == True:
+            if self.land_data[player.name][land_name]['explode_protect'] == True:
                 toggle2.default_value = True
             else:
                 toggle2.default_value = False
             toggle3 = Toggle(
-                label=f'{ColorFormat.YELLOW}开启危险生物防护 （苦力怕, 凋零）'
+                label=f'{ColorFormat.YELLOW}阻止凋零进入领地'
             )
-            if self.land_data[player.name][land_name]["mob_grief_protect"] == True:
+            if self.land_data[player.name][land_name]['anti_wither_enter'] == True:
                 toggle3.default_value = True
             else:
                 toggle3.default_value = False
             toggle4 = Toggle(
-                label=f'{ColorFormat.YELLOW}阻止一切右键交互方块'
+                label=f'{ColorFormat.YELLOW}阻止非领地成员右键交互方块'
             )
             if self.land_data[player.name][land_name]['anti_right_click_block'] == True:
                 toggle4.default_value = True
             else:
                 toggle4.default_value = False
             toggle5 = Toggle(
-                label=f'{ColorFormat.YELLOW}阻止一切方块破坏'
+                label=f'{ColorFormat.YELLOW}阻止非领地成员破坏方块'
             )
             if self.land_data[player.name][land_name]['anti_break_block'] == True:
                 toggle5.default_value = True
             else:
                 toggle5.default_value = False
             toggle6 = Toggle(
-                label=f'{ColorFormat.YELLOW}阻止一切右键交互实体'
+                label=f'{ColorFormat.YELLOW}阻止非领地成员右键交互实体'
             )
             if self.land_data[player.name][land_name]['anti_right_click_entity'] == True:
                 toggle6.default_value = True
             else:
                 toggle6.default_value = False
             toggle7 = Toggle(
-                label=f'{ColorFormat.YELLOW}公开领地传送点'
+                label=f'{ColorFormat.YELLOW}阻止非领地成员攻击'
             )
-            if self.land_data[player.name][land_name]['public_land'] == True:
+            if self.land_data[player.name][land_name]['anti_player_attack'] == True:
                 toggle7.default_value = True
             else:
                 toggle7.default_value = False
+            toggle8 = Toggle(
+                label=f'{ColorFormat.YELLOW}公开领地传送点'
+            )
+            if self.land_data[player.name][land_name]['public_land'] == True:
+                toggle8.default_value = True
+            else:
+                toggle8.default_value = False
             my_land_set_security_form = ModalForm(
                 title=f'{ColorFormat.BOLD}{ColorFormat.LIGHT_PURPLE}设置领地安全',
-                controls=[toggle1, toggle2, toggle3, toggle4, toggle5, toggle6, toggle7],
+                controls=[toggle1, toggle2, toggle3, toggle4, toggle5, toggle6, toggle7, toggle8],
                 on_close=self.my_land
             )
             def on_submit(player: Player, json_str):
@@ -624,13 +638,13 @@ class uland(Plugin):
                 else:
                     self.land_data[player.name][land_name]['fire_protect'] = False
                 if data[1] == True:
-                    self.land_data[player.name][land_name]['tnt_explode_protect'] = True
+                    self.land_data[player.name][land_name]['explode_protect'] = True
                 else:
-                    self.land_data[player.name][land_name]['tnt_explode_protect'] = False
+                    self.land_data[player.name][land_name]['explode_protect'] = False
                 if data[2] == True:
-                    self.land_data[player.name][land_name]['mob_grief_protect'] = True
+                    self.land_data[player.name][land_name]['anti_wither_enter'] = True
                 else:
-                    self.land_data[player.name][land_name]['mob_grief_protect'] = False
+                    self.land_data[player.name][land_name]['anti_wither_enter'] = False
                 if data[3] == True:
                     self.land_data[player.name][land_name]['anti_right_click_block'] = True
                 else:
@@ -644,6 +658,10 @@ class uland(Plugin):
                 else:
                     self.land_data[player.name][land_name]['anti_right_click_entity'] = False
                 if data[6] == True:
+                    self.land_data[player.name][land_name]['anti_player_attack'] = True
+                else:
+                    self.land_data[player.name][land_name]['anti_player_attack'] = False
+                if data[7] == True:
                     self.land_data[player.name][land_name]['public_land'] = True
                 else:
                     self.land_data[player.name][land_name]['public_land'] = False
@@ -750,11 +768,12 @@ class uland(Plugin):
                 self.land_data[player_to_transfer_ownership_name][land_name]['permissions'] = []
                 self.land_data[player_to_transfer_ownership_name][land_name]['public_land'] = False
                 self.land_data[player_to_transfer_ownership_name][land_name]['fire_protect'] = True
-                self.land_data[player_to_transfer_ownership_name][land_name]['tnt_explode_protect'] = True
-                self.land_data[player_to_transfer_ownership_name][land_name]['mob_grief_protect'] = True
+                self.land_data[player_to_transfer_ownership_name][land_name]['explode_protect'] = True
+                self.land_data[player_to_transfer_ownership_name][land_name]['anti_wither_enter'] = True
                 self.land_data[player_to_transfer_ownership_name][land_name]['anti_right_click_block'] = True
                 self.land_data[player_to_transfer_ownership_name][land_name]['anti_break_block'] = True
                 self.land_data[player_to_transfer_ownership_name][land_name]['anti_right_click_entity'] = True
+                self.land_data[player_to_transfer_ownership_name][land_name]['anti_player_attack'] = True
                 self.land_data[player.name].pop(land_name)
                 self.save_land_data()
                 player.send_message(f'{ColorFormat.YELLOW}过户成功...')
@@ -765,12 +784,9 @@ class uland(Plugin):
     def my_land_sell_confirm(self, land_name, land_sell_money):
         def on_click(player: Player):
             self.land_data[player.name].pop(land_name)
-            self.load_money_data()
-            self.money_data[player.name] += land_sell_money
             self.save_land_data()
-            self.save_money_data()
-            player.send_message(f'{ColorFormat.YELLOW}领地回收成功： {ColorFormat.GREEN}+{land_sell_money}, '
-                                f'{ColorFormat.YELLOW}余额： {ColorFormat.WHITE}{self.money_data[player.name]}')
+            player.send_message(f'{ColorFormat.YELLOW}领地回收成功...')
+            self.server.plugin_manager.get_plugin('umoney').api_change_player_money(player.name, land_sell_money)
         return on_click
 
     # 查询脚下领地信息函数
@@ -1039,17 +1055,6 @@ class uland(Plugin):
             player.send_message(f'{ColorFormat.YELLOW}删除领地成功...')
         return on_click
 
-    # 加载经济数据函数
-    def load_money_data(self):
-        with open(money_data_file_path, 'r', encoding='utf-8') as f:
-            self.money_data = json.loads(f.read())
-
-    # 保存经济数据函数
-    def save_money_data(self):
-        with open(money_data_file_path, 'w+', encoding='utf-8') as f:
-            json_str = json.dumps(self.money_data, indent=4, ensure_ascii=False)
-            f.write(json_str)
-
     # 监听玩家位置函数
     def check_player_pos(self):
         if len(self.server.online_players) == 0:
@@ -1077,16 +1082,6 @@ class uland(Plugin):
                         flag = False
                         break
 
-            '''player_pos = [int(online_player.location.x), int(online_player.location.z)]
-            for land in self.land_list:
-                land_owner = land[0]
-                land_name = land[1]
-                range = land[3]
-                if (min(range[0], range[2]) <= player_pos[0] <= max(range[0], range[2])
-                        and min(range[1], range[3]) <= player_pos[1] <= max(range[1], range[3])):
-                    online_player.send_tip(f'你现在位于 {ColorFormat.YELLOW}{land_owner} {ColorFormat.WHITE}的领地 {land_name}')
-                    break'''
-
     def back_to_main_form(self, player: Player):
         player.perform_command('ul')
 
@@ -1102,9 +1097,7 @@ class uland(Plugin):
     # 监听方块破坏函数
     @event_handler
     def on_block_break(self, event: BlockBreakEvent):
-        # 测试用代码
-        '''self.logger.info(f'{event.player.game_mode.value}')'''
-        if event.player.is_op == True and event.player.game_mode.value == 1:
+        if event.player.is_op and event.player.game_mode.value == 1:
             return
         block_pos = [math.floor(event.block.location.x), math.floor(event.block.location.z)]
         block_dimension = event.block.dimension.name
@@ -1124,14 +1117,14 @@ class uland(Plugin):
                         and land_info['anti_break_block'] == True
                         and (source_player.name != land_owner and source_player.name not in land_info['permissions'])):
                     event.player.send_message(f'{ColorFormat.RED}你无权在此领地破坏方块...')
-                    event.cancelled = True
+                    event.is_cancelled = True
 
-    # 监听特定生物生成函数，例如水晶引起的爆炸 和 闪电引起的着火
+    # 监听闪电生成（防火）
     @event_handler
     def on_mob_spawn(self, event: ActorSpawnEvent):
         # 测试用代码...
         '''self.logger.info(event.actor.name)'''
-        if event.actor.name == 'Ender Crystal' or event.actor.name == 'Lightning Bolt':
+        if event.actor.name == 'Lightning Bolt':
             actor_pos =[math.floor(event.actor.location.x), math.floor(event.actor.location.z)]
             actor_dimension = event.actor.dimension.name
             for value in self.land_data.values():
@@ -1154,28 +1147,19 @@ class uland(Plugin):
                         if (min(prevent_l_bolt_posa[0], prevent_l_bolt_posb[0]) <= actor_pos[0] <= max(prevent_l_bolt_posa[0], prevent_l_bolt_posb[0])
                                 and min(prevent_l_bolt_posa[1], prevent_l_bolt_posb[1]) <= actor_pos[1] <= max(prevent_l_bolt_posa[1], prevent_l_bolt_posb[1])
                                 and actor_dimension == land_info['dimension']):
-                            event.cancelled = True
-                    if land_info['tnt_explode_protect'] == True and event.actor.name == 'Ender Crystal':
-                        prevent_crystal_dx = land_len_x + 14
-                        prevent_crystal_dz = land_len_x + 14
-                        prevent_crystal_posa = [land_center_x + prevent_crystal_dx, land_center_z + prevent_crystal_dz]
-                        prevent_crystal_posb = [land_center_x - prevent_crystal_dx, land_center_z - prevent_crystal_dz]
-                        if (min(prevent_crystal_posa[0], prevent_crystal_posb[0]) <= actor_pos[0] <= max(prevent_crystal_posa[0], prevent_crystal_posb[0])
-                                and min(prevent_crystal_posa[1], prevent_crystal_posb[1]) <= actor_pos[1] <= max(prevent_crystal_posa[1], prevent_crystal_posb[1])
-                                and actor_dimension == land_info['dimension']):
-                            event.cancelled = True
-        else:
-            return
+                            event.is_cancelled =True
 
     # 监听玩家攻击函数
-    # 待 API 完善继续写
-    def on_player_attack(self, event: ActorKnockbackEvent):
-        mob_under_attack_pos = [math.floor(event.actor.location.x), math.floor(event.actor.location.z)]
-        mob_under_attack_dimension = event.actor.dimension.name
-        source_mob = event.source
-        if source_mob != Player:
+    @event_handler
+    def on_player_attack(self, event: ActorDamageEvent):
+        damage_source = event.damage_source.actor
+        if not isinstance(damage_source, Player):
             return
-        source_player = source_mob
+        source_player = damage_source
+        if source_player.is_op and source_player.game_mode.value == 1:
+            return
+        actor_under_attack_pos = [math.floor(event.actor.location.x), math.floor(event.actor.location.z)]
+        actor_under_attack_dimension = event.actor.dimension.name
         for key, value in self.land_data.items():
             land_owner = key
             land = value
@@ -1185,17 +1169,18 @@ class uland(Plugin):
                 it = re.finditer(r'[-+]?\d+(?:\.\d+)?', land_info['range'])
                 for i in it:
                     range.append(int(i.group()))
-                if (min(range[0], range[2]) <= mob_under_attack_pos[0] <= max(range[0], range[2])
-                        and min(range[1], range[3]) <= mob_under_attack_pos[1] <= max(range[1], range[3])
-                        and mob_under_attack_dimension == land_info['dimension']
+                if (min(range[0], range[2]) <= actor_under_attack_pos[0] <= max(range[0], range[2])
+                        and min(range[1], range[3]) <= actor_under_attack_pos[1] <= max(range[1], range[3])
+                        and actor_under_attack_dimension == land_info['dimension']
+                        and land_info['anti_player_attack'] == True
                         and (source_player.name != land_owner and source_player.name not in land_info['permissions'])):
-                    event.source.send_message(f'{ColorFormat.RED}你无权在此领地攻击生物...')
-                    event.cancelled = True
+                    source_player.send_message(f'{ColorFormat.RED}你无权攻击此领地的生物或玩家...')
+                    event.is_cancelled = True
 
     # 监听玩家右键方块函数
     @event_handler
     def on_player_right_click_block(self, event: PlayerInteractEvent):
-        if event.player.is_op == True and event.player.game_mode.value == 1:
+        if event.player.is_op and event.player.game_mode.value == 1:
             return
         block_pos = [math.floor(event.block.location.x),math.floor(event.block.location.z)]
         block_dimension = event.block.dimension.name
@@ -1215,12 +1200,12 @@ class uland(Plugin):
                         and land_info['anti_right_click_block'] == True
                         and (source_player.name != land_owner and source_player.name not in land_info['permissions'])):
                     source_player.send_message(f'{ColorFormat.RED}你无权在此领地右键交互方块...')
-                    event.cancelled = True
+                    event.is_cancelled = True
 
-    # 监听玩家右键 Mob 函数
+    # 监听玩家右键实体函数
     @event_handler
     def on_player_right_click_entity(self, event: PlayerInteractActorEvent):
-        if event.player.is_op == True and event.player.game_mode.value == 1:
+        if event.player.is_op and event.player.game_mode.value == 1:
             return
         actor_pos = [math.floor(event.actor.location.x), math.floor(event.actor.location.z)]
         actor_dimension = event.actor.dimension.name
@@ -1239,10 +1224,29 @@ class uland(Plugin):
                         and actor_dimension == land_info['dimension']
                         and land_info['anti_right_click_entity'] == True
                         and (source_player.name != land_owner and source_player.name not in land_info['permissions'])):
-                    source_player.send_message(f'{ColorFormat.RED}你无权在此领地右键交互生物...')
-                    event.cancelled = True
+                    source_player.send_message(f'{ColorFormat.RED}你无权在此领地右键交互实体...')
+                    event.is_cancelled = True
 
-    # 领地 TNT 防爆, 防 Creeper, wither, fireball 周期任务函数
+    # 监听生物爆炸函数
+    @event_handler
+    def on_mob_explode(self, event: ActorExplodeEvent):
+        for key, value in self.land_data.items():
+            land_owner = key
+            land = value
+            for key, value in land.items():
+                land_info = value
+                range = []
+                it = re.finditer(r'[-+]?\d+(?:\.\d+)?', land_info['range'])
+                for i in it:
+                    range.append(int(i.group()))
+                for block in event.block_list:
+                    if (min(range[0], range[2]) <= math.floor(block.location.x) <= max(range[0], range[2])
+                            and min(range[1], range[3]) <= math.floor(block.location.z) <= max(range[1], range[3])
+                            and block.dimension.name == land_info['dimension']
+                            and land_info['explode_protect'] == True):
+                        event.is_cancelled = True
+
+    # 领地防火/防凋零进入领地周期任务函数
     def land_protect_task(self):
         if len(self.server.online_players) == 0:
             return
@@ -1275,25 +1279,12 @@ class uland(Plugin):
                     self.server.dispatch_command(self.CommandSenderWrapper, f'execute in {execute_dimension} run '
                                                                             f'kill @e[type=fireball, x={fire_ball_protect_posa[0]}, y=320, z={fire_ball_protect_posa[1]}, '
                                                                             f'dx={-fire_ball_protect_dx * 2}, dy=-384, dz={-fire_ball_protect_dz * 2}]')
-                if land_info['tnt_explode_protect'] == True:
-                    tnt_protect_dx = land_len_x + 7
-                    tnt_protect_dz = land_len_z + 7
-                    tnt_protect_posa = [land_center_x + tnt_protect_dx, land_center_z + tnt_protect_dz]
-                    self.server.dispatch_command(self.CommandSenderWrapper, f'execute in {execute_dimension} run '
-                                                                            f'kill @e[type=tnt, x={tnt_protect_posa[0]}, y=320, z={tnt_protect_posa[1]}, '
-                                                                            f'dx={-tnt_protect_dx*2}, dy=-384, dz={-tnt_protect_dz*2}]')
-                if land_info['mob_grief_protect'] == True:
-                    creeper_protect_dx = land_len_x + 5
-                    creeper_protect_dz = land_len_z + 5
-                    creeper_protect_posa = [land_center_x + creeper_protect_dx, land_center_z + creeper_protect_dz]
-                    wither_protect_dx = land_len_x + 20
-                    wither_protect_dz = land_len_z + 20
-                    wither_protect_posa = [land_center_x + wither_protect_dx, land_center_z + wither_protect_dz]
-                    self.server.dispatch_command(self.CommandSenderWrapper, f'execute in {execute_dimension} run '
-                                                                            f'tp @e[type=creeper, x={creeper_protect_posa[0]}, y=320, z={creeper_protect_posa[1]}, '
-                                                                            f'dx={-creeper_protect_dx*2}, dy=-384, dz={-creeper_protect_dz*2}] 0 -100 0')
+                if land_info['anti_wither_enter'] == True:
+                    wither_protect_dx = land_len_x + 3
+                    wither_protect_dx = land_len_z + 3
+                    wither_protect_posa = [land_center_x + wither_protect_dx, land_center_z + fire_ball_protect_dz]
                     self.server.dispatch_command(self.CommandSenderWrapper, f'execute in {execute_dimension} run '
                                                                             f'tp @e[type=wither, x={wither_protect_posa[0]}, y=320, z={wither_protect_posa[1]}, '
-                                                                            f'dx={-wither_protect_dx*2}, dy=-384, dz={-wither_protect_dz*2}] 0 -100 0')
+                                                                            f'dx={-wither_protect_dx*2}, dy=-384, dz={-wither_protect_dx*2}] 0 -100 0')
                     self.server.dispatch_command(self.CommandSenderWrapper, f'execute in {execute_dimension} run '
                                                                             f'kill @e[type=wither, x=0, y=-100, z=0, r=20]')
