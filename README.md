@@ -14,6 +14,10 @@
 * **Hot reload support:** Operators can edit/update `config.json` or `land.json` in game directly.
 
 ### Installation
+[Required pre-plugin] UMoney
+
+[Optional pre-plugin] ZX_UI
+
 Put `.whl` file into the endstone plugins folder, and then start the server. Enter the command `/utp` to call out the main form.
 
 ### Download
