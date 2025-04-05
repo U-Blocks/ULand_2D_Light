@@ -34,12 +34,12 @@ class uland(Plugin):
     api_version = '0.6'
 
     def on_enable(self):
-        # 检测 UMoney 前置是否安装
+        # Check whether the pre-plugin umoney has been installed.
         if not os.path.exists(money_data_file_path):
             self.logger.error(f'{ColorFormat.RED}缺少前置 UMoney...')
             self.server.plugin_manager.disable_plugin(self)
 
-        # 加载领地数据
+        # Load land data.
         if not os.path.exists(land_data_file_path):
             land_data = {}
             with open(land_data_file_path, 'w', encoding='utf-8') as f:
@@ -48,27 +48,36 @@ class uland(Plugin):
         else:
             with open(land_data_file_path, 'r', encoding='utf-8') as f:
                 land_data = json.loads(f.read())
-        for land in land_data.values():
-            for land_info in land.values():
-                # 250221 update - remove
-                if land_info.get('tnt_explode_protect') is not None:
-                    land_info.pop('tnt_explode_protect')
-                # 250221 update - remove
-                if land_info.get('mob_grief_protect') is not None:
-                    land_info.pop('mob_grief_protect')
-                # 250221 update - add
-                if land_info.get('anti_player_attack') is None:
-                    land_info['anti_player_attack'] = True
-                if land_info.get('explode_protect') is None:
-                    land_info['explode_protect'] = True
-                if land_info.get('anti_wither_enter')is None:
-                    land_info['anti_wither_enter'] = True
-        with open(land_data_file_path, 'w+', encoding='utf-8') as f:
-            json_str = json.dumps(land_data, indent=4, ensure_ascii=False)
-            f.write(json_str)
+
+        # Initialize land data.
+        if len(land_data) != 0:
+            allowed_key_list = ['public_land', 'fire_protect', 'explode_protect', 'anti_wither_enter',
+                          'anti_right_click_block', 'anti_break_block', 'anti_right_click_entity',
+                        'anti_player_attack']
+            land: dict
+            land_info: dict
+            for land in land_data.values():
+                for land_info in land.values():
+                    for key in list(land_info.keys()):
+                        if key not in allowed_key_list:
+                            land_info.pop(key)
+
+            for land in land_data.values():
+                for land_info in land.values():
+                    for key in allowed_key_list:
+                        if land_info.get(key) is None:
+                            if key == 'public_land':
+                                land_info[key] = False
+                            else:
+                                land_info[key] = True
+
+            with open(land_data_file_path, 'w+', encoding='utf-8') as f:
+                json_str = json.dumps(land_data, indent=4, ensure_ascii=False)
+                f.write(json_str)
+
         self.land_data = land_data
 
-        # 加载配置文件
+        # Load config data.
         if not os.path.exists(config_data_file_path):
             config_data = {'land_buy_price': 5,
                            'land_create_timeout': 30,
@@ -84,7 +93,7 @@ class uland(Plugin):
                 config_data = json.loads(f.read())
         self.config_data = config_data
 
-        # 加载 lang 数据
+        # Load lang data.
         self.lang_data = lang.load_lang(self, lang_dir)
 
         self.record_create_land_event = {}
