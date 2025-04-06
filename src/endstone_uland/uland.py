@@ -52,7 +52,7 @@ class uland(Plugin):
         # Initialize land data.
         if len(land_data) != 0:
             allowed_key_list = [
-                'dimension', 'range', 'area', 'land_expense', 'land_buy_time', 'land_tp', 'permissions'
+                'dimension', 'range', 'area', 'land_expense', 'land_buy_time', 'land_tp', 'permissions',
                 'public_land', 'fire_protect', 'explode_protect', 'anti_wither_enter',
                 'anti_right_click_block', 'anti_break_block', 'anti_right_click_entity',
                 'anti_player_attack'
