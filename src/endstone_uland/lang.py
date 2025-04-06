@@ -27,7 +27,7 @@ class lang():
                     'teleport_point': '传送点',
                     'creation_time': '创建时间',
                     'button.back': '返回上一级',
-                    'message.type_error': '',
+                    'message.type_error': '表单解析错误, 请按提示正确填写...',
 
                     'main_form.title': 'ULand - 主表单',
                     'main_form.content': '请选择操作...',
@@ -218,7 +218,7 @@ class lang():
                     'teleport_point': 'Teleport point',
                     'creation_time': 'Creation time',
                     'button.back': 'Back to previous',
-                    'message.type_error': '',
+                    'message.type_error': 'The form is parsed incorrectly, please follow the prompts to fill in correctly...',
 
                     'main_form.title': 'ULand - main form',
                     'main_form.content': 'Please select a function...',

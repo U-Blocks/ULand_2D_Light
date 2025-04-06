@@ -36,7 +36,7 @@ class uland(Plugin):
     def on_enable(self):
         # Check whether the pre-plugin umoney has been installed.
         if not os.path.exists(money_data_file_path):
-            self.logger.error(f'{ColorFormat.RED}缺少前置 UMoney...')
+            self.logger.error(f'{ColorFormat.RED}Missing pre-plugin UMoney...')
             self.server.plugin_manager.disable_plugin(self)
 
         # Load land data.
@@ -51,9 +51,12 @@ class uland(Plugin):
 
         # Initialize land data.
         if len(land_data) != 0:
-            allowed_key_list = ['public_land', 'fire_protect', 'explode_protect', 'anti_wither_enter',
-                          'anti_right_click_block', 'anti_break_block', 'anti_right_click_entity',
-                        'anti_player_attack']
+            allowed_key_list = [
+                'dimension', 'range', 'area', 'land_expense', 'land_buy_time', 'land_tp', 'permissions'
+                'public_land', 'fire_protect', 'explode_protect', 'anti_wither_enter',
+                'anti_right_click_block', 'anti_break_block', 'anti_right_click_entity',
+                'anti_player_attack'
+            ]
             land: dict
             land_info: dict
             for land in land_data.values():
@@ -64,7 +67,7 @@ class uland(Plugin):
 
             for land in land_data.values():
                 for land_info in land.values():
-                    for key in allowed_key_list:
+                    for key in allowed_key_list[7:]:
                         if land_info.get(key) is None:
                             if key == 'public_land':
                                 land_info[key] = False
@@ -104,21 +107,21 @@ class uland(Plugin):
             sender=self.server.command_sender,
             on_message=None
         )
-        self.logger.info(f'{ColorFormat.YELLOW}ULand 已启用...')
+        self.logger.info(f'{ColorFormat.YELLOW}ULand is enabled...')
 
     commands = {
         'ul': {
-            'description': '打开领地表单',
+            'description': 'Call out the main form of ULand',
             'usages': ['/ul'],
             'permissions': ['uland.command.ul']
         },
         'posa': {
-            'description': '选中A点',
+            'description': 'Select point A',
             'usages': ['/posa'],
             'permissions': ['uland.command.posa']
         },
         'posb': {
-            'description': '选中B点',
+            'description': 'Select point B',
             'usages': ['/posb'],
             'permissions': ['uland.command.posb']
         }
@@ -126,15 +129,15 @@ class uland(Plugin):
 
     permissions ={
         'uland.command.ul': {
-            'description': '打开领地表单',
+            'description': 'Call out the main form of ULand',
             'default': True
         },
         'uland.command.posa': {
-            'description': '选中A点',
+            'description': 'Select point A',
             'default': True
         },
         'uland.command.posb': {
-            'description': '选中B点',
+            'description': 'Select point B',
             'default': True
         }
     }
@@ -142,7 +145,7 @@ class uland(Plugin):
     def on_command(self, sender: CommandSender, command: Command, args: list[str]):
         if command.name == 'ul':
             if not isinstance(sender, Player):
-                sender.send_message(f'{ColorFormat.RED}该命令只能由玩家执行...')
+                sender.send_message(f'{ColorFormat.RED}This command can only be executed by a player...')
                 return
             player = sender
 
@@ -216,12 +219,14 @@ class uland(Plugin):
                 player.send_message(f'{ColorFormat.RED}{self.get_text(player, "create_land.message.fail_5")}: '
                                     f'{ColorFormat.WHITE}{self.get_text(player, "create_land.message.fail_5.reason_2")}')
                 return
+
             PosB = [math.floor(player.location.x), math.floor(player.location.z)]
             PosA = self.record_create_land_event[player.name]['PosA']
             if PosA == PosB:
                 player.send_message(f'{ColorFormat.RED}{self.get_text(player, "create_land.message.fail_5")}: '
                                     f'{ColorFormat.WHITE}{self.get_text(player, "create_land.message.fail_5.reason_3")}')
                 return
+
             self.record_create_land_event[player.name]['PosB'] = PosB
             player.send_message(f'{ColorFormat.YELLOW}{self.get_text(player, "create_land.message.success_3")}\n'
                                 f'{self.get_text(player, "coordinates")} ({PosB[0]}, ~, {PosB[1]})')
