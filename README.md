@@ -31,6 +31,9 @@ Plugins/
 ├─ uland/
 │  ├─ config.json
 │  ├─ land.json
+│  ├─ lang/
+│  │  ├─ zh_CN.json
+│  │  ├─ en_US.json
 ```
 
 ### Configuration
@@ -86,6 +89,9 @@ ULand allows operators or players to edit/update relevant settings through GUI f
 Off course you can add your mother language to ULand, just creat `XX_XX.json` (such as `ja_JP.json`) and translate value with reference to `en_US.json`.
 
 You can also creat a PR to this repo to make your mother language one of the official languages of ULand.
+
+### Screenshots
+You can view related screenshots of UTP from images folder of this repo.
 
 ### Operation document
 you can go to the operation document folder of this repo to learn how to use ULand.
