@@ -6,7 +6,7 @@
 
 [![Minecraft - Version](https://img.shields.io/badge/minecraft-v1.21.60_(Bedrock)-black)](https://feedback.minecraft.net/hc/en-us/sections/360001186971-Release-Changelogs)
 [![PyPI - Version](https://img.shields.io/pypi/v/endstone)](https://pypi.org/project/endstone)
-![Total Git clones](https://img.shields.io/badge/dynamic/json?label=Total%20Git%20clones&query=$&url=https://cdn.jsdelivr.net/gh/umarurize/UTP@ULand_2D_Light/clone_count.txt&color=brightgreen)
+![Total Git clones](https://img.shields.io/badge/dynamic/json?label=Total%20Git%20clones&query=$&url=https://cdn.jsdelivr.net/gh/umarurize/ULand_2D_Light@master/clone_count.txt&color=brightgreen)
 
 ### Introductions
 * **Rich features:** `land create`, `land info`, `land buy`, `land sell`, `land rename`, `land member add`, `land member remove`, `land security setting`, `land tp`, `land tp setting`, `land ownership transfer`, `land public`...
