@@ -6,12 +6,14 @@
 
 [![Minecraft - Version](https://img.shields.io/badge/minecraft-v1.21.60_(Bedrock)-black)](https://feedback.minecraft.net/hc/en-us/sections/360001186971-Release-Changelogs)
 [![PyPI - Version](https://img.shields.io/pypi/v/endstone)](https://pypi.org/project/endstone)
+![Total Git clones](https://img.shields.io/badge/dynamic/json?label=Total%20Git%20clones&query=$&url=https://cdn.jsdelivr.net/gh/umarurize/UTP@ULand_2D_Light/clone_count.txt&color=brightgreen)
 
 ### Introductions
 * **Rich features:** `land create`, `land info`, `land buy`, `land sell`, `land rename`, `land member add`, `land member remove`, `land security setting`, `land tp`, `land tp setting`, `land ownership transfer`, `land public`...
 * **Ultra protection:** `fire protection`, `explosion protection`, `wither protection`, `block interaction`, `block breaking`, `entity interaction`, `player attacks`...
 * **Full GUI:** Beautiful GUI forms for easy operation rather than commands.
 * **Hot reload support:** Operators can edit/update `config.json` or `land.json` in game directly.
+* **Localized languages support**
 
 ### Installation
 [Required pre-plugin] UMoney
@@ -77,12 +79,20 @@ ULand allows operators or players to edit/update relevant settings through GUI f
 }
 ```
 
-### Wiki
-English version is under construction...
+### Languages
+- [x] `zh_CN`
+- [x] `en_US`
 
-:link:https://docs.qq.com/pdf/DQktCeFdUYW1wZ1h2
+Off course you can add your mother language to ULand, just creat `XX_XX.json` (such as `ja_JP.json`) and translate value with reference to `en_US.json`.
 
-<img height="300" src="https://github.com/umarurize/ULand_2D_Light/blob/master/logo/ULand2.png" />
+You can also creat a PR to this repo to make your mother language one of the official languages of ULand.
+
+### Operation document
+you can go to the operation document folder of this repo to learn how to use ULand.
+
+<div style="width: 100%; text-align: center;">
+  <img src="https://github.com/umarurize/ULand_2D_Light/blob/master/logo/ULand2.png" style="max-width: 100%; height: auto;">
+</div>
 
 ![](https://img.shields.io/badge/language-python-blue.svg) [![GitHub License](https://img.shields.io/github/license/umarurize/UTP)](LICENSE)
 
