@@ -16,7 +16,7 @@
 * **Localized languages support**
 
 ### Installation
-[Required pre-plugin] UMoney
+[Required pre-plugin] [UMoney](https://github.com/umarurize/UMoney)
 
 [Optional pre-plugin] ZX_UI
 
