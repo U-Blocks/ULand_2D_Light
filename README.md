@@ -6,11 +6,42 @@
 
 [![Minecraft - Version](https://img.shields.io/badge/minecraft-v1.21.60_(Bedrock)-black)](https://feedback.minecraft.net/hc/en-us/sections/360001186971-Release-Changelogs)
 [![PyPI - Version](https://img.shields.io/pypi/v/endstone)](https://pypi.org/project/endstone)
+
 ![Total Git clones](https://img.shields.io/badge/dynamic/json?label=Total%20Git%20clones&query=$&url=https://cdn.jsdelivr.net/gh/umarurize/ULand_2D_Light@master/clone_count.txt&color=brightgreen)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/umarurize/ULand_2D_Light/total)
 
 ### Introductions
-* **Rich features:** `land create`, `land info`, `land buy`, `land sell`, `land rename`, `land member add`, `land member remove`, `land security setting`, `land tp`, `land tp setting`, `land ownership transfer`, `land public`...
-* **Ultra protection:** `fire protection`, `explosion protection`, `wither protection`, `block interaction`, `block breaking`, `entity interaction`, `player attacks`...
+<details>
+<summary>Rich features</summary>
+    
+- [x] Land create
+- [x] Land info
+- [x] Land buy
+- [x] Land sell
+- [x] Land member add
+- [x] Land member remove
+- [x] Land tp
+- [x] Land security settings
+- [x] Land tp setting
+- [x] Land ownership transfer
+- [x] Land public
+- [x] Land manage (operators)
+
+</details>
+
+<details>
+<summary>Ultra protection</summary>
+    
+- [x] Fire protection
+- [x] Explosion protection
+- [x] Wither protection
+- [x] Block interaction
+- [x] Block breaking
+- [x] Entity protection
+- [x] Player attacks
+
+</details>
+
 * **Full GUI:** Beautiful GUI forms for easy operation rather than commands.
 * **Hot reload support:** Operators can edit/update `config.json` or `land.json` in game directly.
 * **Localized languages support**
@@ -40,7 +71,7 @@ Plugins/
 ULand allows operators or players to edit/update relevant settings through GUI forms with ease, here are just simple explanations for relevant configurations.
 
 `config.json`
-```json
+```json5
 {
     "land_buy_price": 20,  // the unit price of the purchase of the land (per square block)
     "land_create_timeout": 60,  // the max time in seconds taken to create a land
@@ -52,7 +83,7 @@ ULand allows operators or players to edit/update relevant settings through GUI f
 ```
 
 `land.json`
-```json
+```json5
 {
 "DENHJE": {
         "DENHJE的领地": {
