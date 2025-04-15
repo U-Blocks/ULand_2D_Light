@@ -122,7 +122,7 @@ Off course you can add your mother language to ULand, just creat `XX_XX.json` (s
 You can also creat a PR to this repo to make your mother language one of the official languages of ULand.
 
 ### :camera:Screenshots
-You can view related screenshots of UTP from images folder of this repo.
+You can view related screenshots of ULand from images folder of this repo.
 
 ### :fire:Operation document
 you can go to the operation document folder of this repo to learn how to use ULand.
