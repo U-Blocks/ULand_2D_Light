@@ -10,7 +10,7 @@
 ![Total Git clones](https://img.shields.io/badge/dynamic/json?label=Total%20Git%20clones&query=$&url=https://cdn.jsdelivr.net/gh/umarurize/ULand_2D_Light@master/clone_count.txt&color=brightgreen)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/umarurize/ULand_2D_Light/total)
 
-### Introductions
+### :bell:Introductions
 <details>
 <summary>Rich features</summary>
     
@@ -46,17 +46,17 @@
 * **Hot reload support:** Operators can edit/update `config.json` or `land.json` in game directly.
 * **Localized languages support**
 
-### Installation
+### :hammer:Installation
 [Required pre-plugin] [UMoney](https://github.com/umarurize/UMoney)
 
 [Optional pre-plugin] ZX_UI
 
 Put `.whl` file into the endstone plugins folder, and then start the server. Enter the command `/utp` to call out the main form.
 
-### Download
+### :computer:Download
 Now, you can get the release version form this repo or <code><a href="https://www.minebbs.com/resources/uland-2d-light-gui.9967/"><img height="20" src="https://github.com/umarurize/umaru-cdn/blob/main/images/minebbs.png" alt="Minebbs" /></a>&nbsp;Minebbs</code>.
 
-### File structure
+### :file_folder:File structure
 ```
 Plugins/
 ├─ uland/
@@ -67,7 +67,7 @@ Plugins/
 │  │  ├─ en_US.json
 ```
 
-### Configuration
+### :pencil:Configuration
 ULand allows operators or players to edit/update relevant settings through GUI forms with ease, here are just simple explanations for relevant configurations.
 
 `config.json`
@@ -113,7 +113,7 @@ ULand allows operators or players to edit/update relevant settings through GUI f
 }
 ```
 
-### Languages
+### :globe_with_meridians:Languages
 - [x] `zh_CN`
 - [x] `en_US`
 
@@ -121,10 +121,10 @@ Off course you can add your mother language to ULand, just creat `XX_XX.json` (s
 
 You can also creat a PR to this repo to make your mother language one of the official languages of ULand.
 
-### Screenshots
+### :camera:Screenshots
 You can view related screenshots of UTP from images folder of this repo.
 
-### Operation document
+### :fire:Operation document
 you can go to the operation document folder of this repo to learn how to use ULand.
 
 <div style="width: 100%; text-align: center;">
