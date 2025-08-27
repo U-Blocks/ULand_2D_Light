@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "endstone-uland"
-version = "250406"
+version = "250827"
 description = "A light 2D land system plug-in with rich and interesting features."
 
 [project.entry-points."endstone"]
