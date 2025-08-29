@@ -1,6 +1,4 @@
-![header](https://capsule-render.vercel.app/api?type=venom&height=150&color=gradient&text=ULand%202D%20Light&fontColor=0:8871e5,100:b678c4&fontSize=50&desc=A%20light%202D%20land%20system%20with%20rich%20features.&descAlignY=80&descSize=20&animation=fadeIn)
-
-****
+## ULand 2D Light
 
 <code><a href="https://github.com/umarurize/ULand_2D_Light"><img height="25" src="https://github.com/umarurize/ULand_2D_Light/blob/master/logo/ULand.png" alt="ULand 2D Light" /></a>&nbsp;ULand 2D Light</code>
 
@@ -11,39 +9,59 @@
 <details>
 <summary>Rich features</summary>
     
-- [x] Land create
-- [x] Land info
-- [x] Land buy
-- [x] Land sell
-- [x] Land member add
-- [x] Land member remove
-- [x] Land tp
-- [x] Land security settings
-- [x] Land tp setting
-- [x] Land ownership transfer
-- [x] Land public
-- [x] Land manage (operators)
+- [x] Claim a land
+- [x] Query a land
+- [x] Rename a land
+- [x] Sell a land
+- [x] Teleport to a land
+- [x] Transfer ownership of a land
+- [x] Add/remove a member for a land
+- [x] Update teleport point for a land
+- [x] Edit/update security settings for a land
+- [x] Public lands
+- [x] Manage a land (Operatores)
 
 </details>
 
 <details>
 <summary>Ultra protection</summary>
     
-- [x] Fire protection
-- [x] Explosion protection
-- [x] Wither protection
-- [x] Block interaction
-- [x] Block breaking
-- [x] Entity protection
-- [x] Player attacks
+- [x] Make the land public
+- [x] Can thunder spawn in the land?
+- [x] Can explosions spawn in the land?
+- [x] Can strangers place blocks in the land?
+- [x] Can strangers break blocks in the land?
+- [x] Can strangers left click blocks in the land?
+- [x] Can strangers right click blocks in the land?
+- [x] Can strangers right click entities in the land?
+- [x] Can strangers damage players or entities in the land?
+- [x] Can fire damage players or entities in the land?
+- [x] Can poison effect be applied to players or entities in the land?
+- [x] Can wither effect be applied to players or entities in the land?
+- [x] Can wither enter the land? 
 
 </details>
 
-* **Full GUI:** Beautiful GUI forms for easy operation rather than commands.
-* **Hot reload support:** Operators can edit/update `config.json` or `land.json` in game directly.
+* **Full GUI support**
+* **Hot reload support:**
 * **Localized languages support**
 
 ### :hammer:Installation
+<details>
+<summary>Check your Endstone's version</summary>
+    
+*  **Endstone 0.10.0+**
+   *   250827
+*  **Endstone 0.6.0 - Endstone 0.9.4**
+    *  250406
+    *  250221 
+*  **Endstone 0.5.6 - Endstone 0.5.7.1**
+    *  250127
+    *  250113
+    *  250110
+
+</details>
+
 [Required pre-plugin] [UMoney](https://github.com/umarurize/UMoney)
 
 [Optional pre-plugin] ZX_UI
@@ -70,43 +88,56 @@ ULand allows operators or players to edit/update relevant settings through GUI f
 `config.json`
 ```json5
 {
-    "land_buy_price": 20,  // the unit price of the purchase of the land (per square block)
-    "land_create_timeout": 60,  // the max time in seconds taken to create a land
-    "max_area": 40000,  // the max legal area of a single land
-    "max_land_per_player": 25,  // the max number of lands each player can have
-    "is_land_sell_rate_on": true  // whether to enable the floating price (0.0~2.0) of land sell
-    "land_sell_cool_down_timeout": 3 // land sell cooldown in days (When the previous configuration is set to true)
+    "max_land_num_can_per_player_has": 5,
+    "create_a_new_land_time_limit": 60,
+    "max_area_can_per_land_achieve": 10000,
+    "price_for_per_square_block": 10,
+    "selling_price_for_per_square_block": 5
 }
 ```
 
-`land.json`
+`land.json` (for example)
 ```json5
 {
-"DENHJE": {
-        "DENHJE的领地": {
-            "dimension": "Overworld",
-            "range": "(-7977, ~, 2323) - (-8017, ~, 2275)",
-            "area": 1920,
-            "land_expense": 38400,
-            "land_buy_time": "2025-02-24",
-            "land_tp": [
-                -7977,
-                67,
-                2323
+    "TheDeerInDream": {
+        "f9f713237a66930c85cf74ced9d50ed1b2f8f004a29f628ff61aedf65b360d24": {
+            "name": "TheDeerInDream's land",
+            "creation_datetime": "2025-01-16",
+            "price": 61250,
+            "dim": "Overworld",
+            "posa": [
+                -4759,
+                -5514
             ],
-            "permissions": [
-                "xubaobao0310"
+            "posb": [
+                -4661,
+                -5639
             ],
-            "public_land": false,
-            "fire_protect": true,
-            "explode_protect": true,
-            "anti_wither_enter": true,
-            "anti_right_click_block": true,
-            "anti_break_block": true,
-            "anti_right_click_entity": true,
-            "anti_player_attack": true
-        }
-    }
+            "area": 12250,
+            "tp_pos": [
+                -4704,
+                127,
+                -5570
+            ],
+            "members": [
+                "umaru rize",
+                "SoleWool4183955"
+            ],
+            "security_settings": {
+                "is_land_public": false,
+                "can_thunder_spawn": false,
+                "can_explosion_spawn": false,
+                "can_stranger_place_block": false,
+                "can_stranger_break_block": false,
+                "can_stranger_left_click_block": false,
+                "can_stranger_right_click_block": false,
+                "can_stranger_right_click_entity": false,
+                "can_stranger_damage_player_or_entity": false,
+                "can_fire_damage_player_or_entity": false,
+                "can_poison_effect_applied_to_player_or_entity": false,
+                "can_wither_effect_applied_to_player_or_entity": false,
+                "can_wither_enter_land": false
+            }
 }
 ```
 
