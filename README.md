@@ -66,7 +66,7 @@
 
 [Optional pre-plugin] ZX_UI
 
-Put `.whl` file into the endstone plugins folder, and then start the server. Enter the command `/utp` to call out the main form.
+Put `.whl` file into the endstone plugins folder, and then start the server. Enter the command `/ul` to call out the main form.
 
 ### :computer:Download
 Now, you can get the release version form this repo or <code><a href="https://www.minebbs.com/resources/uland-2d-light-gui.9967/"><img height="20" src="https://github.com/umarurize/umaru-cdn/blob/main/images/minebbs.png" alt="Minebbs" /></a>&nbsp;Minebbs</code>.
