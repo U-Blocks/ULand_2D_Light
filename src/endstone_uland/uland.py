@@ -985,7 +985,7 @@ class uland(Plugin):
                       f'{self.get_text(player, "land_remove_member.form.title")}',
                 controls=[dropdown],
                 submit_button=f'{ColorFormat.YELLOW}'
-                              f'{self.get_text(player, "Remove")}',
+                              f'{self.get_text(player, "land_remove_member.form.submit_button")}',
                 on_close=self.lands
             )
 
